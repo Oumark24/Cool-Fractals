@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#e9eff2">
+    <meta name="description" content="Explore the Mandelbrot set: zoom, pan, change palettes, and save the places you find.">
+    <title>Mandelbrot Explorer — Fieldnotes</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="masthead">
+        <a class="brand-mark" href="./" aria-label="Mandelbrot Explorer home">
+          <span class="mark-frame" aria-hidden="true"><span></span></span>
+        </a>
+        <div class="title-block">
+          <h1>Mandelbrot Explorer</h1>
+          <p>Every edge holds another place to look.</p>
+        </div>
+        <div class="header-note" aria-label="The Mandelbrot recurrence">
+          <span class="header-note-label">THE RULE</span>
+          <span class="header-equation">z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</span>
+        </div>
+      </header>
+
+      <main>
+        <div class="workspace">
+          <section class="viewer-column" aria-labelledby="viewer-title">
+            <div class="viewer-heading">
+              <div>
+                <h2 id="viewer-title">The boundary, up close</h2>
+                <p>Choose a place, then follow the detail.</p>
+              </div>
+              <span class="render-status"><span class="status-dot" aria-hidden="true"></span><span id="renderer-label">Rendered in your browser</span></span>
+            </div>
+
+            <div class="viewer-frame">
+              <div class="canvas-meta">
+                <span class="canvas-meta-label">CURRENT POSITION</span>
+                <span id="coordinate-readout" class="coordinate-readout">Re −0.50000 · Im +0.00000</span>
+              </div>
+              <div id="canvas-wrap" class="canvas-wrap">
+                <canvas id="fractal-canvas" tabindex="0" role="img" aria-label="Mandelbrot set. Use arrow keys to pan and plus or minus to zoom."></canvas>
+                <div id="render-error" class="render-error" role="alert" hidden></div>
+                <div class="canvas-index" aria-hidden="true">M / 01</div>
+              </div>
+              <div class="canvas-controls">
+                <div class="zoom-readout-group">
+                  <span class="canvas-meta-label">ZOOM</span>
+                  <strong id="zoom-readout">1.0×</strong>
+                </div>
+                <div class="zoom-buttons" aria-label="Zoom controls">
+                  <button id="zoom-out" class="square-button" type="button" aria-label="Zoom out" data-requires-renderer>−</button>
+                  <button id="zoom-in" class="square-button" type="button" aria-label="Zoom in" data-requires-renderer>+</button>
+                  <button id="reset-view" class="reset-button" type="button" data-requires-renderer>Reset view</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="viewer-instructions">
+              <span>Drag to move · click or scroll to zoom</span>
+              <span><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> pan <span class="instruction-divider">·</span> <kbd>+</kbd><kbd>−</kbd> zoom</span>
+            </div>
+            <p id="precision-note" class="precision-note" hidden>At this depth, ordinary browser numbers may soften the finest detail. Pan to another region or reset to keep exploring.</p>
+          </section>
+
+          <aside class="control-rail" aria-label="Explorer controls">
+            <section class="control-section palette-section" aria-labelledby="palette-heading">
+              <div class="section-title-row">
+                <div>
+                  <h2 id="palette-heading">Color palette</h2>
+                  <p>Change how escape speed is drawn.</p>
+                </div>
+              </div>
+              <div class="palette-grid" role="group" aria-label="Choose fractal color palette">
+                <button class="palette-button is-active" type="button" data-palette="ember" aria-pressed="true" data-requires-renderer>
+                  <span class="palette-swatch swatch-ember" aria-hidden="true"></span><span>Ember</span>
+                </button>
+                <button class="palette-button" type="button" data-palette="tide" aria-pressed="false" data-requires-renderer>
+                  <span class="palette-swatch swatch-tide" aria-hidden="true"></span><span>Tide</span>
+                </button>
+                <button class="palette-button" type="button" data-palette="moss" aria-pressed="false" data-requires-renderer>
+                  <span class="palette-swatch swatch-moss" aria-hidden="true"></span><span>Moss</span>
+                </button>
+                <button class="palette-button" type="button" data-palette="orchid" aria-pressed="false" data-requires-renderer>
+                  <span class="palette-swatch swatch-orchid" aria-hidden="true"></span><span>Orchid</span>
+                </button>
+              </div>
+            </section>
+
+            <section class="control-section places-section" aria-labelledby="places-heading">
+              <div class="section-title-row">
+                <div>
+                  <h2 id="places-heading">Places to visit</h2>
+                  <p>Known details in the set.</p>
+                </div>
+                <span class="section-index" aria-hidden="true">04</span>
+              </div>
+              <div class="spot-list">
+                <button class="spot-button is-active" type="button" data-preset="whole" aria-pressed="true" data-requires-renderer>
+                  <span class="spot-marker" aria-hidden="true"></span>
+                  <span class="spot-copy"><span class="spot-name">The whole set</span><span class="spot-note">Start here</span></span>
+                  <span class="spot-arrow" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M5 11 11 5M5 5h6v6"></path></svg></span>
+                </button>
+                <button class="spot-button" type="button" data-preset="seahorse" aria-pressed="false" data-requires-renderer>
+                  <span class="spot-marker" aria-hidden="true"></span>
+                  <span class="spot-copy"><span class="spot-name">Seahorse Valley</span><span class="spot-note">Around −0.75 + 0.10i</span></span>
+                  <span class="spot-arrow" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M5 11 11 5M5 5h6v6"></path></svg></span>
+                </button>
+                <button class="spot-button" type="button" data-preset="elephant" aria-pressed="false" data-requires-renderer>
+                  <span class="spot-marker" aria-hidden="true"></span>
+                  <span class="spot-copy"><span class="spot-name">Elephant Valley</span><span class="spot-note">Around +0.28 + 0.01i</span></span>
+                  <span class="spot-arrow" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M5 11 11 5M5 5h6v6"></path></svg></span>
+                </button>
+                <button class="spot-button" type="button" data-preset="mini" aria-pressed="false" data-requires-renderer>
+                  <span class="spot-marker" aria-hidden="true"></span>
+                  <span class="spot-copy"><span class="spot-name">Miniature island</span><span class="spot-note">Around −1.75 + 0.00i</span></span>
+                  <span class="spot-arrow" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M5 11 11 5M5 5h6v6"></path></svg></span>
+                </button>
+              </div>
+            </section>
+
+            <section class="control-section saved-section" aria-labelledby="saved-heading">
+              <div class="section-title-row saved-title-row">
+                <div>
+                  <h2 id="saved-heading">Your saved views</h2>
+                  <p id="saved-count">Stored on this device.</p>
+                </div>
+                <span class="section-index" aria-hidden="true">LOCAL</span>
+              </div>
+              <form id="saved-form" class="saved-form">
+                <label class="visually-hidden" for="view-name">Name this view</label>
+                <input id="view-name" name="viewName" type="text" maxlength="40" placeholder="Name this view" autocomplete="off" required>
+                <button class="save-button" type="submit" data-requires-renderer>Save</button>
+              </form>
+              <p id="saved-empty" class="saved-empty">Save a location to return to it later.</p>
+              <ul id="saved-list" class="saved-list" hidden></ul>
+            </section>
+          </aside>
+        </div>
+
+        <section class="explanation-strip" aria-label="How the fractal is made">
+          <div class="rule-explanation">
+            <span class="explanation-label">THE MANDELBROT SET</span>
+            <p>For each point <i>c</i>, begin at <i>z</i> = 0 and repeat <code>z ← z² + c</code>. Points that escape the radius 2 get a color; points that stay bounded remain dark.</p>
+          </div>
+          <div class="depth-explanation">
+            <span class="explanation-label">CURRENT VIEW</span>
+            <strong id="depth-readout">1.0× from the whole set</strong>
+            <span>Color follows the number of iterations before escape.</span>
+          </div>
+        </section>
+      </main>
+
+      <footer class="page-footer">
+        <span>Generated from the Mandelbrot recurrence.</span>
+        <span>Runs locally in your browser · no image or API required</span>
+      </footer>
+    </div>
+    <p id="status-message" class="visually-hidden" aria-live="polite" aria-atomic="true"></p>
+    <noscript><p class="noscript-message">This explorer needs JavaScript enabled to draw the fractal.</p></noscript>
+  </body>
+</html>
