@@ -415,6 +415,8 @@ function initApp() {
   const savedCount = document.getElementById('saved-count');
   const viewName = document.getElementById('view-name');
   const canvasWrap = document.getElementById('canvas-wrap');
+  const activePointers = new Map();
+  let pinch = null;
 
   function canvasBounds() {
     const rect = canvas.getBoundingClientRect();
@@ -643,16 +645,43 @@ function initApp() {
 
   canvas.addEventListener('pointerdown', (event) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-    if (drag) return;
+    if (activePointers.size >= 2) return;
     const point = pointFromEvent(event);
-    drag = { pointerId: event.pointerId, start: point, view: { ...view }, moved: false };
+    activePointers.set(event.pointerId, point);
     canvas.classList.add('is-dragging');
     canvas.setPointerCapture?.(event.pointerId);
+    if (activePointers.size === 1) {
+      drag = { pointerId: event.pointerId, start: point, view: { ...view }, moved: false };
+    } else {
+      const [first, second] = [...activePointers.values()];
+      pinch = {
+        pointerIds: [...activePointers.keys()],
+        startDistance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+        startCenter: { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 },
+        view: { ...view }
+      };
+      drag = null;
+    }
   });
 
   canvas.addEventListener('pointermove', (event) => {
-    if (!drag || drag.pointerId !== event.pointerId) return;
     const point = pointFromEvent(event);
+    if (activePointers.has(event.pointerId)) activePointers.set(event.pointerId, point);
+    if (pinch) {
+      const [first, second] = pinch.pointerIds.map((pointerId) => activePointers.get(pointerId));
+      if (!first || !second) return;
+      const center = { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
+      const distance = Math.max(1, Math.hypot(second.x - first.x, second.y - first.y));
+      const zoomed = zoomViewAt(pinch.view, pinch.startCenter, canvasBounds(), distance / pinch.startDistance);
+      view = panViewByPixels(zoomed, {
+        x: center.x - pinch.startCenter.x,
+        y: center.y - pinch.startCenter.y
+      }, canvasBounds());
+      clearSelection();
+      render();
+      return;
+    }
+    if (!drag || drag.pointerId !== event.pointerId) return;
     const delta = { x: point.x - drag.start.x, y: point.y - drag.start.y };
     if (Math.hypot(delta.x, delta.y) > 3) drag.moved = true;
     if (drag.moved) {
@@ -663,11 +692,27 @@ function initApp() {
   });
 
   function finishPointer(event, cancelled = false) {
+    if (!activePointers.has(event.pointerId)) return;
+    const wasPinching = Boolean(pinch);
+    activePointers.delete(event.pointerId);
+    if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    if (wasPinching) {
+      pinch = null;
+      if (activePointers.size === 1) {
+        const [pointerId, point] = activePointers.entries().next().value;
+        drag = { pointerId, start: point, view: { ...view }, moved: true };
+        canvas.classList.add('is-dragging');
+        return;
+      }
+      drag = null;
+      canvas.classList.remove('is-dragging');
+      if (!cancelled) setStatus('View changed. Coordinates updated.');
+      return;
+    }
     if (!drag || drag.pointerId !== event.pointerId) return;
     const previousDrag = drag;
     drag = null;
     canvas.classList.remove('is-dragging');
-    if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
     if (cancelled) return;
     if (!previousDrag.moved) {
       zoomAt(pointFromEvent(event), 1.55, 'Zoomed toward the selected point');

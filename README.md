@@ -10,12 +10,12 @@ Each point on the screen becomes a complex number. The program repeatedly applie
 
 Try it
 
-Open the live demo: [link added after publishing]. No account or install should be needed.
+The repository is configured to publish through GitHub Pages. After a successful deployment, the live URL is listed in the repository's **Settings → Pages**.
 
 Controls
 
-Zoom with the mouse wheel or pinch, drag to move, and use reset and saved-view buttons to explore.
+Zoom with the mouse wheel or a two-finger pinch, drag to move, and use reset and saved-view buttons to explore.
 
 Rebuild it
 
-I’d aim for plain HTML, CSS, and some JavaScript, with no packages or API keys. That keeps the live demo one click and lets someone download the repo and open the project without a big setup
+The project uses plain HTML, CSS, and JavaScript, with no packages or API keys. To run it locally, start a static server from the repository directory (for example, `python3 -m http.server 8000`) and open `http://localhost:8000`.
