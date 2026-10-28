@@ -1,9 +1,9 @@
 root {
   color-scheme: light;
-  --paper: #e9eff2;
-  --paper-bright: #f8fafb;
+  --paper: #ffffff;
+  --paper-bright: #ebf3f7;
   --rail: #dce8ee;
-  --ink: #193447;
+  --ink: #0d1d29;
   --ink-strong: #102839;
   --ink-muted: #4d6675;
   --rule: #bdcbd2;
@@ -24,7 +24,6 @@ root {
 }
 
 * { box-sizing: border-box; }
-
 html { min-width: 320px; scrollbar-color: var(--rule-strong) var(--paper); }
 
 body {
